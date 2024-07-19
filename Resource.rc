@@ -1,0 +1,3 @@
+#include "winres.h"
+
+101          RCDATA                  "driver\\RTCore64.sys"
