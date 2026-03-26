@@ -1,24 +1,64 @@
-#define WIN32_LEAN_AND_MEAN 
+#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include <winternl.h>
 
+#include <cassert>
 #include <cstdio>
+#include <filesystem>
 #include <iostream>
+#include <string>
+#include <vector>
+#include <newdev.h>
 #include <sddl.h>
+#include <SetupAPI.h>
 #include <shellapi.h>
 #include <stdio.h>
 #include <strsafe.h>
 #include <tchar.h>
 
+#pragma comment(lib, "Newdev.lib")
+#pragma comment(lib, "Setupapi.lib")
+
 #include "krabs.hpp"
 
+#define ASSERT(_x) do { if (!(_x)) { fprintf(stderr, "ASSERT(%s) failed\n", #_x); ExitProcess(1); } } while(0)
+
+// Native API declarations for enableppl.cpp
+constexpr auto SE_DEBUG_PRIVILEGE = 20L;
+EXTERN_C NTSTATUS NTAPI RtlAdjustPrivilege(ULONG, BOOLEAN, BOOLEAN, PBOOLEAN);
+
+constexpr auto SystemExtendedHandleInformation = (SYSTEM_INFORMATION_CLASS)0x40;
+
+#ifndef STATUS_INFO_LENGTH_MISMATCH
+constexpr auto STATUS_INFO_LENGTH_MISMATCH = (NTSTATUS)0xC0000004L;
+#endif
+
+typedef struct _SYSTEM_HANDLE_TABLE_ENTRY_INFO_EX {
+    PVOID Object;
+    ULONG_PTR UniqueProcessId;
+    ULONG_PTR HandleValue;
+    ULONG GrantedAccess;
+    USHORT CreatorBackTraceIndex;
+    USHORT ObjectTypeIndex;
+    ULONG HandleAttributes;
+    ULONG Reserved;
+} SYSTEM_HANDLE_TABLE_ENTRY_INFO_EX, *PSYSTEM_HANDLE_TABLE_ENTRY_INFO_EX;
+
+typedef struct _SYSTEM_HANDLE_INFORMATION_EX {
+    ULONG_PTR NumberOfHandles;
+    ULONG_PTR Reserved;
+    SYSTEM_HANDLE_TABLE_ENTRY_INFO_EX Handles[1];
+} SYSTEM_HANDLE_INFORMATION_EX, *PSYSTEM_HANDLE_INFORMATION_EX;
+
 // enableppl.cpp
-void InstallVulnerableDriver();
 void EnablePPL();
 void DisablePPL();
 
-// loaddriver.cpp
-#define IDR_RT_RCDATA1 101
+// Resource.rc
+constexpr auto IDR_DBUtilDrv2_inf = 201;
+constexpr auto IDR_DBUtilDrv2_cat = 200;
+constexpr auto IDR_DBUtilDrv2_sys = 202;
+constexpr auto IDR_WdfCoInstaller01009_dll = 203;
 
 // version.cpp
 void PrintVersion();

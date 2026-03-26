@@ -1,3 +1,6 @@
 #include "winres.h"
 
-101          RCDATA                  "driver\\RTCore64.sys"
+200 RCDATA "driver\\DBUtilDrv2.cat"
+201 RCDATA "driver\\DBUtilDrv2.inf"
+202 RCDATA "driver\\DBUtilDrv2.sys"
+203 RCDATA "driver\\WdfCoInstaller01009.dll"

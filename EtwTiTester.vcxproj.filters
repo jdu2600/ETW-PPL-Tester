@@ -18,10 +18,7 @@
     <ClCompile Include="enableppl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="loaddriver.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="main.cpp">
+<ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="version.cpp">

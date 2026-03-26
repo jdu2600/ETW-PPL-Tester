@@ -19,6 +19,7 @@ int wmain(int, wchar_t**) {
 
     // Enable any desired events via their keywords.
     // Some events require additional configuration. For background see -
+    // https://github.com/winsiderss/systeminformer/blob/8030be9396047dfa04ca77cec52c0c9c95c1e5dc/phnt/include/ntpsapi.h#L1618-L1640
     // https://www.riskinsight-wavestone.com/en/2023/10/a-universal-edr-bypass-built-in-windows-10/
     // https://www.legacyy.xyz/defenseevasion/windows/2024/04/24/disabling-etw-ti-without-ppl.html
     ti_provider.any(ETW_THREAT_INTEL_KEYWORD_ALLOCVM_LOCAL);
@@ -27,13 +28,11 @@ int wmain(int, wchar_t**) {
         static krabs::schema schema(record, trace_context.schema_locator);
         static krabs::parser parser(schema);
         
-        switch (record.EventHeader.EventDescriptor.Id)
-        {
+        switch (record.EventHeader.EventDescriptor.Id) {
         case ETW_THREAT_INTEL_ALLOCVM_LOCAL:
         {
             auto protectionMask = parser.parse<DWORD>(L"ProtectionMask");
-            if (PAGE_EXECUTE_READWRITE == protectionMask)
-            {
+            if (PAGE_EXECUTE_READWRITE == protectionMask) {
                 auto regionSize = (SIZE_T)parser.parse<PVOID>(L"RegionSize");
                 auto baseAddress = (ULONG_PTR)parser.parse<PVOID>(L"BaseAddress");
                 printf("pid:%u VirtualAlloc( 0x%llx, 0x%llx, PAGE_EXECUTE_READWRITE )\n", record.EventHeader.ProcessId, baseAddress, regionSize);
@@ -49,7 +48,6 @@ int wmain(int, wchar_t**) {
     
     // Use BYOVD to enable PPL and start our trace.
     g_trace.enable(ti_provider);
-    InstallVulnerableDriver();
     EnablePPL();
     HANDLE hThread = CreateThread(NULL, 0, EtwEventThread, NULL, 0, NULL);
     assert(NULL != hThread);
